@@ -17,8 +17,7 @@
         #block(width: 100%, height: 1.5em)[
           #align(center)[
             #if (
-              query(<frontmatter>).len() == 1
-                and query(<frontmatter>).at(0).value.keys().contains("title")
+              query(<frontmatter>).len() == 1 and query(<frontmatter>).at(0).value.keys().contains("title")
             ) {
               emph(query(<frontmatter>).at(0).value.at("title"))
             } else if document.title != none {
@@ -37,7 +36,7 @@
 )
 
 #let default_cjk_font = ("Microsoft YaHei",)
-#let default_latin_font = ("Inter", )
+#let default_latin_font = ("Inter",)
 
 #let default_text_config = (
   size: 12pt,
@@ -50,7 +49,7 @@
   first-line-indent: (amount: 2em, all: true),
   spacing: 1.5em,
   justify: true,
-  leading: 0.8em
+  leading: 0.8em,
 )
 
 #let default_heading_config = (

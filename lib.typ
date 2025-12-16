@@ -6,4 +6,7 @@
 #import "addition.typ": *
 #import "utils.typ": merge_dict, color_map, ratio_color, select_color
 
+#import "frame-fig.typ": frame-stylize, frame
+#import "frame-styling.typ": frame-stylings
+
 
