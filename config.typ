@@ -1,4 +1,21 @@
 #import "./utils.typ": *
+#import "@preview/numbly:0.1.0": numbly
+
+#let main_color = rgb("#528ca8")
+
+#let color-recipe = (
+  main: rgb("#1D4E89"),
+  light: rgb("#6BA3CC"),
+  lighter: rgb("#E1EDF5"),
+  lightest: rgb("#F0F6FA"),
+  accent: rgb("#003153"),
+  code-main: rgb("#b72433"),
+  def: (bg: rgb("#ebf7d1").hsl().darken(10%).transparentize(65%), main: rgb("#78b10e")),
+  theorem: (bg: rgb("#E0F2F1").hsl().darken(10%).transparentize(65%), main: rgb("#26A69A")),
+  note: (bg: rgb("#FFF8E1").hsl().darken(10%).transparentize(65%), main: rgb("#FFB74D")),
+  example: (bg: rgb("#F3E5F5").hsl().darken(10%).transparentize(65%), main: rgb("#9a1cb1")),
+  proof: (bg: rgb("#ffeaef").hsl().darken(10%).transparentize(65%), main: rgb("#f791a9")),
+)
 
 #let default_page_config = (
   // 页面尺寸
@@ -8,11 +25,18 @@
   // 左右，上下边界
   margin: (x: 1.5cm, y: 2.5cm),
   // 背景填充色，如果需要自定义背景需要将content传入background参数
-  fill: rgb("#fdfbf7"),
+  fill: tiling(size: (15pt, 15pt), rect(fill: rgb("#fdfbf7"), width: 100%, height: 100%, inset: 0pt)[
+    #place(line(stroke: (paint: luma(90%), thickness: 0.3pt), start: (0%, 0%), end: (100%, 100%)))
+    #place(line(stroke: (paint: luma(90%), thickness: 0.3pt), start: (0%, 100%), end: (100%, 0%)))
+  ]),
   // 配置页码格式
   numbering: "1",
   header: context {
+    let heading1 = query(heading.where(level: 1).after(here()))
+    if heading1.len() == 0 or heading1.first().location().page() == here().page() { return [] }
+    let heading2 = query(heading.where(level: 1).before(here()))
     [
+      #set text(fill: color-recipe.main)
       #align(bottom)[
         #block(width: 100%, height: 1.5em)[
           #align(center)[
@@ -22,12 +46,14 @@
               emph(query(<frontmatter>).at(0).value.at("title"))
             } else if document.title != none {
               emph(document.title)
+            }#if heading2.len() > 0 {
+              [-#emph(heading2.last().body)]
             }
           ]
           // 画一条线
           #place(bottom, dy: 0.5em)[#line(
             length: 100%,
-            stroke: 1pt + luma(50%),
+            stroke: 1pt + color-recipe.light,
           )]
         ]
       ]
@@ -35,14 +61,17 @@
   },
 )
 
-#let default_cjk_font = ("Microsoft YaHei",)
-#let default_latin_font = ("Inter",)
+#let default_cjk_font = ("Source Han Serif SC",)
+// #let default_latin_font = ((name: "Arial", covers: regex("[\d•‣–]")),)
+#let default_latin_font = ("Charter",)
 
 #let default_text_config = (
   size: 12pt,
-  fill: luma(10%),
+  fill: luma(15%),
   font: default_latin_font + default_cjk_font,
   cjk-latin-spacing: auto,
+  weight: "medium",
+  hyphenate: true,
 )
 
 #let default_par_config = (
@@ -53,7 +82,12 @@
 )
 
 #let default_heading_config = (
-  numbering: "1.1",
+  numbering: numbly(
+    "{1:一}、",
+    "{2}.",
+    "{2}.{3}.",
+    "{2}.{3}.{4}.",
+  ),
   supplement: "章节",
 )
 
@@ -62,7 +96,7 @@
   body-indent: 0.5em,
 )
 
-#let defualt_enum_config = (
+#let default_enum_config = (
   indent: 2em,
   body-indent: 0.5em,
 )
@@ -78,7 +112,7 @@
     numbering("1-1", (counter(heading).at(here())).first(), figure_pos)
   },
   scope: "parent",
-  placement: bottom,
+  placement: auto,
 )
 
 #let default_underline_config = (
@@ -90,7 +124,7 @@
 )
 
 #let default_code_text_config = (
-  font: ("Consolas", "LXGW Wenkai Mono GB"),
+  font: ("Maple Mono", "LXGW Wenkai GB"),
   size: 10pt,
 )
 
@@ -102,7 +136,10 @@
   header: v(-1.5em),
   footer: v(-1.5em),
   numbering-separator: true,
+  extend: false,
 )
+
+#let default_highlight_config = ()
 
 #let config-page(..args) = {
   let b = args.named()
@@ -136,7 +173,7 @@
 
 #let config-enum(..args) = {
   let b = args.named()
-  return (enum: merge_dict(defualt_enum_config, b))
+  return (enum: merge_dict(default_enum_config, b))
 }
 
 

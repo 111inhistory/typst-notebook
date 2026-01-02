@@ -76,9 +76,9 @@
   let body = fig.body
   let title_body = fig.caption.separator + fig.caption.body
   let title_prefix = if show_counter {
-    [#kind #context numbering(fig.numbering, ..counter(figure.where(kind: kind)).get())]
+    [#fig.supplement #context numbering(fig.numbering, ..counter(figure.where(kind: kind)).get())]
   } else {
-    [#kind]
+    [#fig.supplement]
   }
 
   let title-text-default = (weight: "bold", fill: main_color.darken(50%))
@@ -101,6 +101,7 @@
     stroke: (left: (paint: main_color, thickness: 0.3em)),
     radius: 0.5em,
     fill: bg_color,
+    breakable: true,
   align(left)[
     #title
     #body

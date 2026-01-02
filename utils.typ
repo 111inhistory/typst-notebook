@@ -29,19 +29,3 @@
   let r = calc.max(0.0, calc.min(1.0, float(ratio)))
   color.hsl(r * 360deg, 80%, 70%)
 }
-
-#let color_map = (
-  rgb("#97dcff"),
-  rgb("#ff9f5b"),
-  rgb("#86dc89"),
-  rgb("#b88cef"),
-  rgb("#f791a9"),
-)
-
-#let color_counter = counter("_color_counter")
-
-#let select_color() = {
-  let a = context color_map.at(calc.rem-euclid(color_counter.get().at(0) - 1, color_map.len()))
-  color_counter.step()
-  a
-}

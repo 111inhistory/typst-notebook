@@ -45,10 +45,7 @@
 }
 
 #let customized_outline() = {
-  set page(header: none)
-  v(2em)
-  make_heading(strong("Content"), 22pt, show-line: true)
-  v(2em)
+  heading(level: 1, outlined: false, numbering: none)[Contents]
   outline(title: none)
 }
 
@@ -64,7 +61,7 @@
   set par(first-line-indent: 0em)
   align(horizon + left)[
     #if title != none and title != "" {
-      text(size: 20pt)[#h(20pt)*#title*]
+      pad(std.title(title), 2em)
     }
     #if abstract != none and abstract != "" {
       v(2em)
@@ -80,13 +77,16 @@
   pagebreak()
 }
 
-#state("bib", ())
-
 #let load-bib(..args) = context {
   import "@preview/citegeist:0.2.0": load-bibliography
   let a = read(..args)
-  let b = state("bib").get()
-  b.push(dic => dic.push(load-bibliography(a)))
+  state("bib", ()).update(
+    arr => if arr == none {
+      load-bibliography(a)
+    } else {
+      arr.push(load-bibliography(a))
+    },
+  )
 }
 
 #let code(..args, body) = {
@@ -124,3 +124,14 @@
 
 #let parb = parbreak()
 #let pageb = pagebreak()
+
+#let nullset = math.cancel(math.circle, angle: 20deg, length: 100%) // 谁家空集符号TM用0去cos的啊！！！
+
+#let char-replace(doc) = {
+  show "->": sym.arrow
+  show "=>": sym.arrow.double
+  show "<-": sym.arrow.l
+  show "<=": sym.arrow.double.l
+  show "!=": sym.eq.not
+  doc
+}

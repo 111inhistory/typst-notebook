@@ -1,6 +1,6 @@
 #import "frame-styling.typ": frame-stylings
 
-#let frame(kind: none, style: "simple", ..args) = {
+#let frame(kind: none, supplement: none, style: "simple", ..args) = {
   if kind == none {
     panic("Frame kind must be specified.")
   }
@@ -22,12 +22,20 @@
 
   title = frame-stylings.at(style).at("caption")(..title)
 
-  return figure(
-    kind: kind,
-    caption: title,
-    supplement: kind,
-    body,
-  )
+  if supplement == none {
+    figure(
+      kind: kind,
+      caption: title,
+      body,
+    )
+  } else {
+    figure(
+      kind: kind,
+      caption: title,
+      supplement: supplement,
+      body,
+    )
+  }
 }
 
 #let dig(it) = {
@@ -37,6 +45,7 @@
 #let frame-stylize(
   main_color: none,
   tag: none,
+  supplement: none,
   show_counter: false,
   bg_color: none,
   transparency: 80%,
@@ -50,7 +59,9 @@
   } else {
     bg_color
   }
-  show figure.where(kind: tag): set figure(supplement: tag)
+  let default_sup = supplement
+  if supplement == none { default_sup = tag }
+  show figure.where(kind: tag): set figure(supplement: default_sup)
   show figure.where(kind: tag): frame-stylings
     .at(style)
     .at("frame")

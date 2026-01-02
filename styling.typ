@@ -5,7 +5,7 @@
 #import "@preview/zebraw:0.5.5": *
 #import "@preview/citegeist:0.2.0": load-bibliography
 
-#let heading-size = state("heading-size", (20pt, 8pt))
+#let heading-size = state("heading-size", (19pt, 17pt, 15pt, 13pt))
 #let par-spacing-state = state("par-spacing", 1.2em)
 #let page-conf-state = state("page-conf", (:))
 #let par-conf-state = state("par-conf", (:))
@@ -43,7 +43,7 @@
         parents.update(arr => arr.slice(0, -1))
       }
       let content = {
-        set par(hanging-indent: 2em)
+        // set par(hanging-indent: 2em)
         context h(-measure(marker).width - li.body-indent)
         marker
         h(li.body-indent)
@@ -107,7 +107,7 @@
       }
       number += delta
       let content = {
-        set par(hanging-indent: 2em)
+        // set par(hanging-indent: 2em)
         context h(-measure(num).width - en.body-indent)
         num
         h(en.body-indent)
@@ -123,15 +123,81 @@
   doc
 }
 
+#let notebook-title(it) = {
+  align(left, block(
+    stroke: (
+      bottom: (
+        paint: gradient.linear(color-recipe.main, color-recipe.light.darken(15%)),
+        thickness: 3pt,
+        cap: "round",
+      ),
+    ),
+    outset: (bottom: 0.3em),
+    strong(it),
+  ))
+}
+
 #let notebook_heading(heading_size, it) = context {
-  let size = level_to_size(it.level, ..heading-size.get())
-  let body = [
-    #if it.numbering != none {
-      numbering(it.numbering, ..counter(heading).get())
-      h(0.5em)
-    }#it.body
-  ]
-  make_heading(body, size, show-line: it.depth <= 2)
+  let size = heading-size.get().at(it.level - 1)
+  let body = []
+  if it.level == 1 {
+    pagebreak(weak: true)
+    body += text(font: ("Arial", "Source Han Serif SC"), weight: "bold")[#if it.numbering != none {
+      numbering(
+        it.numbering,
+        ..counter(heading).get().slice(0, it.level),
+      )
+    }]
+    body += it.body
+    body += v(-0.7em)
+    body += line(length: 2em, stroke: (
+      thickness: 3pt,
+      paint: gradient.linear(color-recipe.light.darken(15%), color-recipe.main, color-recipe.light.darken(15%)),
+      cap: "round",
+    ))
+    set text(size: size, weight: "bold", fill: color-recipe.accent)
+    align(center, block(
+      above: 2em,
+      below: 1.5em,
+      body,
+    ))
+  } else if it.level == 2 {
+    set text(size: size, fill: color-recipe.accent, font: "HarmonyOS Sans SC")
+    body += text(font: ("Arial", "HarmonyOS Sans SC"), weight: "bold")[#if it.numbering != none {
+      numbering(
+        it.numbering,
+        ..counter(heading).get().slice(0, it.level),
+      )
+    }]
+    body += h(0.2em)
+    body += it.body
+    body = (
+      h(-3pt - 0.3em)
+        + box(
+          rect(
+            width: 3pt,
+            fill: gradient.linear(dir: ttb, color-recipe.main, color-recipe.light.darken(15%)),
+            radius: 1.5pt,
+            height: 1.4em,
+          ),
+          baseline: 0.3em,
+        )
+        + h(0.3em)
+        + body
+    )
+    block(radius: 0.2em, outset: 0.2em, spacing: 1em, above: 1.5em, below: 1.5em, body)
+  } else {
+    set text(size: size, fill: color-recipe.accent, font: "HarmonyOS Sans SC")
+    body += text(font: ("Arial", "HarmonyOS Sans SC"), weight: "bold")[#if it.numbering != none {
+      numbering(
+        it.numbering,
+        ..counter(heading).get().slice(0, it.level),
+      )
+    }]
+    body += h(0.2em)
+    body += it.body
+    block(above: 1.5em, below: 1.5em, body)
+  }
 }
 
 #let notebook_link(it) = {
@@ -144,7 +210,8 @@
 #let notebook_ref(it) = context {
   let a = state("bib").final()
   if it.element == none and (a == none or not a.keys().contains(str(it.target))) {
-    text(fill: orange.darken(10%), weight: "bold", "[? " + str(it.target) + "]")
+    // text(fill: orange.darken(10%), weight: "bold", "[? " + str(it.target) + "]")
+    it.fields()
   } else {
     set text(blue)
     underline(it, stroke: (thickness: 0.5pt, paint: blue))
@@ -152,14 +219,15 @@
 }
 
 #let notebook_inline_code(it) = {
-  set text(top-edge: "ascender", bottom-edge: "descender", weight: "regular", fill: rgb("#d73a49"), size: 1em)
+  set text(weight: "regular", fill: rgb("#d73a49"), size: 1em)
   [
     #box(
       fill: luma(96%),
-      radius: 3pt,
-      inset: (x: 3pt, y: 0pt),
-      outset: (y: 2pt),
-      baseline: 10%,
+      radius: 0.28em,
+      inset: (x: 0.28em, y: 0em),
+      outset: (y: 0.28em),
+      stroke: (paint: luma(80%), thickness: 0.05em),
+      baseline: -0.05em,
     )[#it]
   ]
 }
@@ -172,6 +240,7 @@
   custom-link: notebook_link,
   custom-ref: notebook_ref,
   custom-inline-code: notebook_inline_code,
+  custom-title: notebook-title,
   cjk-italic-font: ("LXGW WenKai GB",),
   inline-math-display: math.display, // math.display | math.inline
   heading_size: (10pt, 22pt),
@@ -210,7 +279,7 @@
   let enum-conf = if a.keys().contains("enum") {
     a.at("enum")
   } else {
-    defualt_enum_config
+    default_enum_config
   }
   let terms-conf = if a.keys().contains("terms") {
     a.at("term")
@@ -231,6 +300,11 @@
     a.at("code-text")
   } else {
     default_code_text_config
+  }
+  let highlight-conf = if a.keys().contains("highlight") {
+    a.at("highlight")
+  } else {
+    default_highlight_config
   }
 
   let _ = context {
@@ -266,6 +340,7 @@
   set terms(..terms-conf)
   set figure(..figure-conf)
   set underline(..underline-conf)
+  set highlight(..highlight-conf)
 
   show raw: set text(..code-text-conf)
 
@@ -274,6 +349,9 @@
   show link: custom-link
   show ref: custom-ref
   show raw.where(block: false): custom-inline-code
+  show title: custom-title
+
+  show strong: set text(fill: color-recipe.accent)
 
   show emph: it => {
     show regex("[\\u4e00-\\u9fa5\\uFF00-\\uFFEF]+"): it => {
@@ -290,10 +368,12 @@
 
   show math.equation.where(block: false): inline-math-display
   show math.equation.where(block: true): set text(size: 13pt)
-
+  show math.equation: set text(features: ("cv01",), font: ("New Computer Modern Math", "LXGW Wenkai GB"), weight: 500)
   show math.equation.where(block: false): it => [#h(inline-math-spacing)#it#h(inline-math-spacing)]
 
   show: zebraw.with(..custom_zebraw_style)
+
+  show: char-replace
 
   doc
 }
